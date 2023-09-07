@@ -5,6 +5,9 @@ from stability_sdk import client
 import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
 from PIL import Image
 from langchain.tools import Tool, StructuredTool
+import requests
+
+#from app import generate_image
 
 os.environ["STABILITY_HOST"] = "grpc.stability.ai:443"
 
@@ -66,12 +69,12 @@ def _generate_image(prompt: str, init_image=None):
                 name = get_image_name()
                 cl.user_session.set(name, artifact.binary)
                 cl.user_session.set("generated_image", name)
+
                 return name
             else:
                 raise ValueError(
                     f"Your request did not generate an image. Please modify the prompt and try again. Finish reason: {artifact.finish_reason}"
                 )
-
 
 def generate_image(prompt: str):
     image_name = _generate_image(prompt)
@@ -88,6 +91,12 @@ def edit_image(init_image_name: str, prompt: str):
 
     return f"Here is {image_name} based on {init_image_name}."
 
+def generate_story(prompt:str):
+    from qa_tools import complete
+    story = complete(prompt)
+
+    return story
+
 
 generate_image_tool = Tool.from_function(
     func=generate_image,
@@ -100,5 +109,12 @@ edit_image_tool = StructuredTool.from_function(
     func=edit_image,
     name="EditImage",
     description="Useful to edit an image with a prompt. Works well with commands such as 'replace', 'add', 'change', 'remove'.",
+    return_direct=True,
+)
+
+generate_story_tool = StructuredTool.from_function(
+    func=generate_story,
+    name="GenerateStory",
+    description="Useful to generate story with a prompt. Works well with commands such as 'story', 'book', 'comic', '故事'.",
     return_direct=True,
 )

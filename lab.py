@@ -45,6 +45,7 @@ def query_pinecone(query:str, index_name:str, text_key:str)->str:
         #print(f"\n## Document {i}\n")
         #print(d.page_content)
         context.append(d.page_content )
+
     
     return context
 

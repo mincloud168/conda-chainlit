@@ -10,7 +10,8 @@ from time import sleep
 import traceback
 from dotenv import load_dotenv
 import pandas as pd
-
+from langchain.document_loaders import PyPDFLoader
+import re
 
 load_dotenv()
 
@@ -23,7 +24,7 @@ def read_csv_upsert_pinecone(fileName: str, index: pinecone.Index) -> None:
     #df = "" #read pdf file  #pd.read_csv(fileName)
     df = pd.read_csv(fileName)
     for i,row in df.iterrows():
-        #print(row)
+        print(row)
         title = row["title"]
         heading = row["heading"]
         content = row["content"]
@@ -123,7 +124,21 @@ def call_api(project_id:str, pinecone_api_key:str, pinecone_env:str,  openai_api
     # view index stats
     print(index.describe_index_stats())
 
+def get_part_paragraph(p:str):
+    # Using String Methods
+    start_keyword = "案情摘要"
+    end_keyword = "肇災原因"
 
+    start_index = p.find(start_keyword)
+    end_index = p.find(end_keyword)
+
+    if start_index != -1 and end_index != -1:
+        extracted_text = p[start_index:end_index]
+        print("Extracted Text using String Methods:")
+        print(extracted_text)
+        return extracted_text
+    else:
+        print("Keywords not found.")
 
 
 # parameters: project_id:str, pinecone_api_key:str, pinecone_api_key:str, openai_api_key:str
@@ -131,11 +146,25 @@ def main():
     PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
     PINECONE_ENV = os.getenv("PINECONE_ENV")
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-    #my_project_id = 'mtnet-faq'
-    #my_csv = './MTNetQA.csv'
+    my_project_id = 'mtnet-faq-index'
+    my_csv = './osha_case.csv'
     #my_csv = './pcc.csv'
-    #call_api(my_project_id,PINECONE_API_KEY,PINECONE_ENV, OPENAI_API_KEY,my_csv)
+    call_api(my_project_id,PINECONE_API_KEY,PINECONE_ENV, OPENAI_API_KEY,my_csv)
     # Create Index, 
+    """
+    loader = PyPDFLoader("./110_labor_cases.pdf")
+    pages = loader.load_and_split()
+    i=0
+    for _ in pages:
+        if i > 3: #read page 3 - 10
+            content = pages[i].page_content
+            #p_summary = get_part_paragraph(content)
+            print(content)
+        i+=1
+        if i > 5:
+            break
+            """
+
 
 
 if __name__ == "__main__":

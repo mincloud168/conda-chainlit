@@ -18,7 +18,7 @@ def question_answer(message:str):
 faq_tool = StructuredTool.from_function(
     func=question_answer,
     name="FAQTool",
-    description="MTNet questions and answers people often ask. MTNet相關的問題與答案",
+    description="safety fell down questions and answers people often ask. command with prompt including 'safety'",
     return_direct=True,
 )
 
